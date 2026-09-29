@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Downloaded face-detection model weights (fetched by scripts/download-models.ts)
+server/models/*.bin
+server/models/*.json
+!server/models/.gitkeep
+
+# Prisma
+server/prisma/migrations/.tmp/
+demo-assets/
+
+# Locally uploaded files (runtime data, not source)
+server/storage/originals/*
+server/storage/processed/*
+server/storage/thumbnails/*
+!server/storage/originals/.gitkeep
+!server/storage/processed/.gitkeep
+!server/storage/thumbnails/.gitkeep
+package-lock.json

@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ImageStatus {
+  PENDING // uploaded, waiting to be picked up by a worker
+  PROCESSING // worker is running the validation pipeline
+  ACCEPTED
+  REJECTED
+}
+
+enum ValidationRule {
+  FORMAT
+  RESOLUTION
+  DUPLICATE
+  BLUR
+  FACE_SIZE
+  MULTIPLE_FACES
+}
+
+model Image {
+  id       String @id @default(uuid())
+  sourceId String? // client-generated ID for the browser session, used to route socket events
+
+  originalFilename String
+  mimeType         String
+  fileSizeBytes    Int
+  width            Int?
+  height           Int?
+
+  // Storage keys, not URLs: signed URLs are minted on read so a bucket policy
+  // change or credential rotation never requires a data migration.
+  originalStorageKey  String
+  processedStorageKey String? // set once HEIC->JPEG/format normalization + thumbnail generation runs
+  thumbnailStorageKey String?
+
+  // 64-bit perceptual (difference) hash stored as a fixed-width bit string so
+  // Postgres can compute Hamming distance in-query via bit_count(a # b)
+  // instead of pulling every row into the app to compare in memory.
+  perceptualHash String? @db.Bit(64)
+
+  status ImageStatus @default(PENDING)
+
+  // Denormalized rejection summary for fast list-view rendering without a join;
+  // the authoritative per-rule detail still lives in ValidationResult.
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  validationResults ValidationResult[]
+
+  // Keyset pagination on (createdAt, id) plus status filtering are the two
+  // access patterns the list endpoint needs; both are covered here.
+  @@index([status, createdAt(sort: Desc), id])
+  @@index([sourceId])
+  @@index([perceptualHash])
+}
+
+model ValidationResult {
+  id      String         @id @default(uuid())
+  imageId String
+  image   Image          @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  rule    ValidationRule
+  passed  Boolean
+  message String
+  // Rule-specific structured detail (e.g. { width, height }, { faceCount },
+  // { matchedImageId, hammingDistance }) kept as JSON to avoid a sparse,
+  // ever-growing set of nullable columns for each rule's unique metadata.
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([imageId])
+  @@index([rule, passed])
+}

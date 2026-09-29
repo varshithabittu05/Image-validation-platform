@@ -1,0 +1,61 @@
+{
+  "name": "image-validation-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REST API for image upload, async validation pipeline, and metadata storage",
+  "main": "dist/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "download-models": "tsx scripts/download-models.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.669.0",
+    "@aws-sdk/s3-request-presigner": "^3.669.0",
+    "@prisma/client": "^5.20.0",
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "@vladmandic/face-api": "^1.7.15",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "file-type": "^16.5.4",
+    "heic-convert": "^2.1.0",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "pino": "^9.4.0",
+    "pino-http": "^10.3.0",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.8.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/heic-convert": "^2.1.0",
+    "@types/jest": "^29.5.13",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.16.10",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "pino-pretty": "^11.2.2",
+    "prisma": "^5.20.0",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
